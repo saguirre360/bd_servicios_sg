@@ -264,7 +264,60 @@ DELIMITER ;
 SELECT * FROM REPUESTOS
 SELECT NOMBRE_REPUESTO(3);
 
-SELECT * FROM CLIENTES 
+USE SERVICIOS_SG2
+SELECT * FROM MAQUINAS 
 SELECT NOMBRE_CLIENTE (2);
+
+----------------------------------------------------------------------
+
+/// CREACION DE STORE PROCEDURES ///
+
+// EL SIGUIENTE SP TIENE COMO OBJETIVO EL ORDENAR LAS VENTAS POR LOS MONTOS DE LAS MISMAS, PUDIENDO
+HACERLO DE MANERA ASCENDENTE O DESCENDETE ///
+
+
+DELIMITER //
+CREATE PROCEDURE ventas_por_monto (IN columna VARCHAR(20), IN orden VARCHAR(10))
+BEGIN
+SET @columna=columna;
+SET @orden=orden;
+SET @q = 'SELECT * FROM ventas ORDER BY';
+SET @qfinal = concat(@q,' ',@columna,' ',@orden,';');
+PREPARE ejecutar FROM @qfinal; 
+EXECUTE ejecutar;
+DEALLOCATE PREPARE ejecutar;
+END
+///
+
+/// A CONTINUACION PROBAMOS EL SP LLAMANDOLO /// 
+
+use servicios_sg2
+
+call ventas_por_monto ('monto' , 'asc')
+
+
+// POR OTRO LADO ESTE SP TIENE COMO OBJETIVO INGRESAR NUEVOS VALORES EN LA TABLA CLIENTES, 
+CON LA SALVEDAD QUE NO SE PUEDAN CARGAR NUEVOS CLIENTES DUPLICANDO EL MAIL ///
+
+
+select * from clientes
+
+DELIMITER //
+CREATE PROCEDURE Nuevo_cliente (IN nombre varchar(10),IN apellido varchar(10), IN telefono numeric(24,0), IN nuevo_mail varchar(50))
+BEGIN
+IF (SELECT count(mail) from clientes where mail= nuevo_mail)>0 THEN
+   SELECT 'No se puede duplicar mail';
+ELSE
+   INSERT INTO clientes (nombre, apellido, telefono, mail ) VALUES (nombre, apellido, telefono, nuevo_mail);
+END IF;
+END
+///
+
+/// A CONTINUACION PROBAMOS EL SP LLAMANDOLO. PODEMOS OBSERVAR QUE UNA VEZ QUESE CARGA UN NUEVO CLIENTE
+Y SE INTENTA LLAMAR DE NUEVO, UN CARTEL INDICARA QUE NO SE PUEDE YA QUE SE ESTARA REPITIENDO EL MAIL /// 
+
+CALL NUEVO_CLIENTE ('eutasio', 'hernandez', '65498785253', 'eutasio_hernandez@azul.com');
+
+
 
 
