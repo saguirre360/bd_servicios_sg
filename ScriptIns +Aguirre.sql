@@ -320,4 +320,64 @@ CALL NUEVO_CLIENTE ('eutasio', 'hernandez', '65498785253', 'eutasio_hernandez@az
 
 
 
+----------------------------------------------------------------------
 
+/// CREACION DE TRIGGERS ///
+
+/// Este trigger tendra como funcion el hacer un back up de registro de ventas del negocio. Primero 
+se crea la tabla backup de ventas y luego creamos y probamos el trigger // 
+
+use servicios_sg2
+
+CREATE TABLE backup_ventas (
+    nro_operacion  int primary key auto_increment not null , 
+    id_clientes int not null,
+    nro_orden_trabajo int not null,
+    fecha date not null,
+    monto numeric(24,0) not null
+);
+
+CREATE TRIGGER backup_ventas 
+AFTER INSERT ON ventas 
+FOR EACH ROW 
+INSERT INTO backup_ventas (nro_operacion, id_clientes, nro_orden_trabajo, fecha, monto)
+VALUES (NEW.nro_operacion, NEW.id_clientes, NEW.nro_orden_trabajo, NEW.fecha, NEW.monto);
+
+INSERT INTO ventas (`nro_operacion`,`id_clientes`,`nro_orden_trabajo`,`fecha`,`monto`) 
+VALUES (16,4,6,'2022-11-01',5000);
+
+SELECT * FROM VENTAS
+SELECT * FROM backup_ventas
+
+/// Este segundo Trigger tiene como funcion ser una bitacora de los cambios efectuados en los 
+montos de la tabla ventas. Primero se crea una nueva tabla llamada Bitacora_ventas, a continuacion se crea y
+prueba el trigger ///
+
+CREATE TABLE bitacora_ventas(
+id_bitacora INT NOT NULL AUTO_INCREMENT,
+fecha DATE NOT NULL,
+hora TIME NOT NULL,
+usuario_id VARCHAR(45),
+nro_operacion INT,
+old_monto VARCHAR(30),
+new_monto VARCHAR(30),
+primary key(id_bitacora));
+
+
+CREATE TRIGGER bitacora_ventas
+BEFORE UPDATE ON ventas
+FOR EACH ROW
+INSERT INTO bitacora_ventas
+(fecha,hora,usuario_id,nro_operacion,old_monto,new_monto)
+VALUES
+(curdate(),curtime(),session_user(), OLD.nro_operacion ,OLD.monto,NEW.monto);
+
+select * from ventas
+
+update ventas 
+set monto='5000'
+where nro_operacion='3';
+
+select * from bitacora_ventas;
+
+ 
