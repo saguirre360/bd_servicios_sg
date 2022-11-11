@@ -303,7 +303,8 @@ CON LA SALVEDAD QUE NO SE PUEDAN CARGAR NUEVOS CLIENTES DUPLICANDO EL MAIL ///
 select * from clientes
 
 DELIMITER //
-CREATE PROCEDURE Nuevo_cliente (IN nombre varchar(10),IN apellido varchar(10), IN telefono numeric(24,0), IN nuevo_mail varchar(50))
+CREATE PROCEDURE Nuevo_cliente (IN nombre varchar(10),IN apellido varchar(10), IN telefono numeric(24,0),
+ IN nuevo_mail varchar(50))
 BEGIN
 IF (SELECT count(mail) from clientes where mail= nuevo_mail)>0 THEN
    SELECT 'No se puede duplicar mail';
@@ -350,8 +351,8 @@ SELECT * FROM VENTAS
 SELECT * FROM backup_ventas
 
 /// Este segundo Trigger tiene como funcion ser una bitacora de los cambios efectuados en los 
-montos de la tabla ventas. Primero se crea una nueva tabla llamada Bitacora_ventas, a continuacion se crea y
-prueba el trigger ///
+montos de la tabla ventas. Primero se crea una nueva tabla llamada Bitacora_ventas, a continuacion 
+se crea y prueba el trigger ///
 
 CREATE TABLE bitacora_ventas(
 id_bitacora INT NOT NULL AUTO_INCREMENT,
@@ -379,5 +380,26 @@ set monto='5000'
 where nro_operacion='3';
 
 select * from bitacora_ventas;
+
+
+
+----------------------------------------------------------------------
+/// A CONTINUACION SE CREARAN Y PROBARAN DOS USUARIOS, UNO DE ELLOS PARA LOS TECNICOS, 
+PARA QUE PUEDAN ACCEDER A REALIZAR CONSULTAS, Y OTRO PARA LA ADMINISTRACION, DANDO YA PERMISOS 
+DE LECTURA, INSERCION Y MODIFICACION DE LAS TABLAS. SE QUITA EL PERMISO A AMBOS USUARIOS DE 
+ELIMINAR REGISTROS ///
+
+
+use mysql;
+select * from user;
+CREATE USER 'tecnico'@'localhost' IDENTIFIED BY 'patagonia1234';
+CREATE USER 'administracion'@'localhost' IDENTIFIED BY 'pampa1234';
+
+GRANT SELECT ON *.* TO 'tecnico'@'localhost';
+GRANT SELECT, INSERT,  UPDATE ON *.* TO 'administracion'@'localhost'; 
+
+REVOKE DELETE ON *.* FROM  'tecnico'@'localhost' ,  'administracion'@'localhost';
+
+SELECT * FROM USER;
 
  
