@@ -402,4 +402,46 @@ REVOKE DELETE ON *.* FROM  'tecnico'@'localhost' ,  'administracion'@'localhost'
 
 SELECT * FROM USER;
 
+ ----------------------------------------------------------------------
+
+///  SENTENCIAS DEL SUBLENGUAJE TCL - A CONTINUACION MUESTRO DOS SENTENCIAS.
+EN LA PRIMERA, BUSCO ELIMINAR TRES FILAS DE LA TABLA ORDEN_DE_TRABAJO, CON LA POSIBILIDAD DE VOLVER 
+ATRAS CON ESTA ACCION, EJECUTANDO ROLLBACK. POR OTRO LADO, PARA CONFIRMAR EL CAMBIO, EJECUTO
+COMMIT ///
+ USE servicios_sg2
+
+SELECT * FROM  orden_de_trabajo;  
+
+START TRANSACTION ;
+DELETE FROM  servicios_sg2.orden_de_trabajo
+WHERE id_clientes = '9'; 
+WHERE id_clientes = '11'; 
+WHERE id_clientes = '8'; 
+
+ROLLBACK;
+
+COMMIT;
+
+/// EN ESTA SEGUNDA SENTENCIA, ESTABLEZCO DOS SAVEPOINTS, COMO PUNTOS DE REFERENCIA CUANDO DESEE 
+UTILIZAR ROLLBACK (ENTIENDASE, SE REALIZARA ROLLBACK HASTA EL SAVEPOINT QUE LLAME///
+START TRANSACTION ;
+
+INSERT INTO ventas (`nro_operacion`,`id_clientes`,`nro_orden_trabajo`,`fecha`,`monto`) VALUES (16,12,16,'2022-10-17',2373);
+INSERT INTO ventas (`nro_operacion`,`id_clientes`,`nro_orden_trabajo`,`fecha`,`monto`) VALUES (17,10,1,'2022-10-17',4956);
+INSERT INTO ventas (`nro_operacion`,`id_clientes`,`nro_orden_trabajo`,`fecha`,`monto`) VALUES (18,1,8,'2022-10-17',9549);
+INSERT INTO ventas (`nro_operacion`,`id_clientes`,`nro_orden_trabajo`,`fecha`,`monto`) VALUES (19,13,13,'2022-10-17',2228);
+
+
+SAVEPOINT ventas_16_19;
+
+INSERT INTO ventas (`nro_operacion`,`id_clientes`,`nro_orden_trabajo`,`fecha`,`monto`) VALUES (20,3,12,'2022-10-17',4545);
+INSERT INTO ventas (`nro_operacion`,`id_clientes`,`nro_orden_trabajo`,`fecha`,`monto`) VALUES (21,2,13,'2022-10-17',5758);
+INSERT INTO ventas (`nro_operacion`,`id_clientes`,`nro_orden_trabajo`,`fecha`,`monto`) VALUES (22,2,12,'2022-10-17',8116);
+INSERT INTO ventas (`nro_operacion`,`id_clientes`,`nro_orden_trabajo`,`fecha`,`monto`) VALUES (23,5,7,'2022-10-17',7587);
+
+SAVEPOINT ventas_20_23;
+ 
+ROLLBACK TO ventas_16_19;
+
+ 
  
